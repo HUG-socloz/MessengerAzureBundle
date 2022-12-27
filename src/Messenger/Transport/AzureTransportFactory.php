@@ -23,6 +23,7 @@ final class AzureTransportFactory implements TransportFactoryInterface
         'subscription' => null,
         'token_expiry' => 3600,
         'receive_mode' => AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+        'keep_locked' => false
     ];
 
     /** @var DsnParser */
@@ -69,6 +70,7 @@ final class AzureTransportFactory implements TransportFactoryInterface
             $this->httpClientFactory->createClient($receiverConfiguration),
             $options['receive_mode'],
             $options['entity_path'],
+            $options['keep_locked'],
             $options['subscription']
         );
     }

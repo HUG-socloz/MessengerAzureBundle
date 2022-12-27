@@ -41,6 +41,7 @@ Detailed list of transport options:
 | `subscription`  | The subcription name to consume messages from a **topic**.  | Only for *topic consumer transports* | |
 | `token_expiry`  | [SAS token](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#generate-a-shared-access-signature-token) validity duration in seconds.  | | `3600` |
 | `receive_mode`  | Set to `peek-lock` to perform a [non destructive read](https://docs.microsoft.com/en-us/rest/api/servicebus/peek-lock-message-non-destructive-read) or to `receive-and-delete` to perform a [destructive-read](https://docs.microsoft.com/en-us/rest/api/servicebus/receive-and-delete-message-destructive-read)  | | `peek-lock` |
+| `keep_locked`  | The **topic** or **queue** name. Only with receive_mode : `peek-lock`  | false | |
 
 Example `config/packages/messenger.yaml`:
 ```yaml
@@ -55,6 +56,24 @@ framework:
                     subscription: 'subscription-name'
                     token_expiry: 60
                     receive_mode: 'receive-and-delete'
+            azure_transport_retry:
+                dsn: '%env(AZURE_SERVICE_BUS_DSN)%'
+                serializer: 'App\Messenger\YourAzureSerializer'
+                options:
+                    entity_path: 'your-topic'
+                    subscription: 'subscription-name'
+                    token_expiry: 60
+                    receive_mode: 'peek-lock'
+            azure_transport_delivery_count:
+                dsn: '%env(AZURE_SERVICE_BUS_DSN)%'
+                serializer: 'App\Messenger\YourAzureSerializer'
+                options:
+                    entity_path: 'your-topic'
+                    subscription: 'subscription-name'
+                    token_expiry: 60
+                    receive_mode: 'peek-lock'
+                    keep_locked: true 
+
 ```
 
 ## Stamps

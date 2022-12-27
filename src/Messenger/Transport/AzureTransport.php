@@ -44,6 +44,9 @@ final class AzureTransport implements TransportInterface
     /** @var string */
     private $entityPath;
 
+    /** @var bool */
+    private $keepLocked;
+
     /** @var string|null */
     private $subscriptionName;
 
@@ -53,6 +56,7 @@ final class AzureTransport implements TransportInterface
         HttpClientInterface $receiverClient,
         string $receiveMode,
         string $entityPath,
+        bool $keepLocked = false,
         ?string $subscriptionName = null
     ) {
         $this->serializer = $serializer;
@@ -60,6 +64,7 @@ final class AzureTransport implements TransportInterface
         $this->receiverClient = $receiverClient;
         $this->receiveMode = $receiveMode;
         $this->entityPath = $entityPath;
+        $this->keepLocked = $keepLocked;
         $this->subscriptionName = $subscriptionName;
     }
 
@@ -220,6 +225,12 @@ final class AzureTransport implements TransportInterface
     {
         // Messages are already deleted in the "Receive And Delete" receive mode
         if (self::RECEIVE_MODE_RECEIVE_AND_DELETE === $this->receiveMode) {
+            return;
+        }
+
+        // In the "peek mode" -> keepLocked left the lock expire
+        // The message will be process again, until Max delivery count has been is reached
+        if (self::RECEIVE_MODE_PEEK_LOCK === $this->receiveMode && $this->keepLocked) {
             return;
         }
 
