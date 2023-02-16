@@ -228,9 +228,13 @@ final class AzureTransport implements TransportInterface
             return;
         }
 
-        // In the "peek mode" -> keepLocked left the lock expire
-        // The message will be process again, until Max delivery count has been is reached
-        if (self::RECEIVE_MODE_PEEK_LOCK === $this->receiveMode && $this->keepLocked) {
+        /** @var null|RedeliveryStamp $redeliveryStamp */
+        $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
+
+        // Using the the "peek mode".
+        // If a RedeliveryStamp has been set and keepLocked : true, the lock token will expire.  
+        // -> The message will can process again, see : Tocken Duration and Max delivery Count)
+        if (self::RECEIVE_MODE_PEEK_LOCK === $this->receiveMode && null !== $redeliveryStamp && $this->keepLocked) {
             return;
         }
 
