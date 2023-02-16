@@ -41,6 +41,7 @@ Detailed list of transport options:
 | `subscription`  | The subcription name to consume messages from a **topic**.  | Only for *topic consumer transports* | |
 | `token_expiry`  | [SAS token](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#generate-a-shared-access-signature-token) validity duration in seconds.  | | `3600` |
 | `receive_mode`  | Set to `peek-lock` to perform a [non destructive read](https://docs.microsoft.com/en-us/rest/api/servicebus/peek-lock-message-non-destructive-read) or to `receive-and-delete` to perform a [destructive-read](https://docs.microsoft.com/en-us/rest/api/servicebus/receive-and-delete-message-destructive-read)  | | `peek-lock` |
+| `keep_locked`  | Do not delete on messenger 'reject' when a RedeliveryStamp is set. Then it keeps the message locked until this lock expires. Only with receive_mode : `peek-lock`, | false | |
 
 Example `config/packages/messenger.yaml`:
 ```yaml

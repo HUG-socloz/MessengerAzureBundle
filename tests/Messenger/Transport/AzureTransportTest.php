@@ -274,6 +274,33 @@ final class AzureTransportTest extends TestCase
         call_user_func($method, $envelope);
     }
 
+
+    /**
+     * The message acknowledgment or rejection must not do anything on the Peek mode
+     * @dataProvider provideDeletingMessageMethodNames
+     */
+    public function testAckRejectDoesNotDeleteOnPeekModeWithKeepLockedOption(string $methodName): void
+    {
+        $receiver = self::createMock(HttpClientInterface::class);
+        $receiver->expects(self::never())->method('request');
+
+        $transport = new AzureTransport(
+            self::createMock(SerializerInterface::class),
+            new MockHttpClient(),
+            $receiver,
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity',
+            true
+        );
+
+        $envelope = new Envelope(new class {});
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
+    }
+
+
     /**
      * The message acknowledgment or rejection must delete using the delete location URL when available
      * @dataProvider provideDeletingMessageMethodNames
@@ -483,7 +510,7 @@ final class AzureTransportTest extends TestCase
      * exception
      * @dataProvider provideDeletingMessageMethodNames
      */
-    public function testAckRejectThrowsOnHttpError(string $methodName): void
+    public function testAckRejectThrowsOnHttpError(string $methodName, bool $keeplocked = false): void
     {
         self::expectException(TransportException::class);
         self::expectExceptionCode(1644340210);
@@ -497,7 +524,8 @@ final class AzureTransportTest extends TestCase
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
-            'entity'
+            'entity',
+            $keeplocked
         );
 
         $envelope = new Envelope(new class {}, [

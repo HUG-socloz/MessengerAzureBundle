@@ -223,6 +223,16 @@ final class AzureTransport implements TransportInterface
             return;
         }
 
+        /** @var null|RedeliveryStamp $redeliveryStamp */
+        $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
+
+        // Using the the "peek mode".
+        // If a RedeliveryStamp has been set and keepLocked : true, the lock token will expire.  
+        // -> The message will can process again, see : Tocken Duration and Max delivery Count)
+        if (self::RECEIVE_MODE_PEEK_LOCK === $this->receiveMode && null !== $redeliveryStamp && $this->keepLocked) {
+            return;
+        }
+
         try {
             $this->receiverClient->request('DELETE', $this->getDeleteUri($envelope));
         } catch (TransportExceptionInterface | HttpExceptionInterface $e) {

@@ -29,6 +29,7 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
         self::assertSame('KeyName', $configuration['shared_access_key_name']);
         self::assertSame('Key', $configuration['shared_access_key']);
         self::assertSame(3600, $configuration['token_expiry']);
+        self::assertSame(false, $configuration['keep_locked']);
 
         if ($isSender) {
             self::assertArrayHasKey('Content-Type', $configuration['options']['headers']);
