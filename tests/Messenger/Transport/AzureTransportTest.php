@@ -16,6 +16,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -279,7 +280,7 @@ final class AzureTransportTest extends TestCase
      * The message acknowledgment or rejection must not do anything on the Peek mode
      * @dataProvider provideDeletingMessageMethodNames
      */
-    public function testAckRejectDoesNotDeleteOnPeekModeWithKeepLockedOption(string $methodName): void
+    public function testAckRejectDoesNotDeleteOnPeekModeWithKeepLockedOptionAndRedeliveryStamp(string $methodName): void
     {
         $receiver = self::createMock(HttpClientInterface::class);
         $receiver->expects(self::never())->method('request');
@@ -293,7 +294,10 @@ final class AzureTransportTest extends TestCase
             true
         );
 
-        $envelope = new Envelope(new class {});
+        $envelope = new Envelope(new class {}, [
+            new RedeliveryStamp(1),
+        ]);
+
 
         /** @var callable $method */
         $method = [$transport, $methodName];
@@ -485,7 +489,8 @@ final class AzureTransportTest extends TestCase
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
-            'entity'
+            'entity',
+            true
         );
 
         $envelope = new Envelope(new class {}, [
